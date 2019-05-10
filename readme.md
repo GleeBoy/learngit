@@ -1,1 +1,1 @@
-# learngit
+learn techniques
