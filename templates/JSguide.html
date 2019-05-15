@@ -23,7 +23,38 @@ function inherit(p){
 	f.prototype = p;
 	return new f();
 }
+// 6.7属性的特性，一个属性包含一个名字和四个属性：value/writable/enumerable/configurable
+Object.getOwnPropertyDescriptor({x:1}, 'x');  // {value: 1, writable: true, enumerable: true, configurable: true}
+Object.getOwnPropertyDescriptor({}, 'toString');    // undefined,继承属性
+var p = Object.defineProperties({},{
+    x:{value:3, writable: true, enumerable:true, configurable:true},
+    y:{value:4, writable: true, enumerable:true, configurable:true},
+    r:{get:function () {
+            return Math.sqrt(this.x*this.x + this.y*this.y)
+        }, enumerable:true, configurable:true}});
+// 6-3 复制属性的特性, 不可枚举属性也会一一复制
+/*
+Object.defineProperty(Object.prototype,"extend",{
+    writable: true,
+    enumerable: false,
+    configurable: true,
+    value: function (o) {  //
+        var names = Object.getOwnPropertyNames(o);
+        for(var i = 0; i < names.length; i++) {
+            if (names[i] in this) continue;  // 同名继续
+            var desc = Object.getOwnPropertyDescriptor(o,name[i]);
+            Object.defineProperty(this, name[i], desc);
+        }
+    }
+});
+*/
+console.log();
 
+
+
+
+
+/* *************9类和模型************ */
 // 9-1 工厂函数表示值范围的类
 function range(from, to){
 	var r = inherit(range.methods);
@@ -85,14 +116,15 @@ Range.prototype.toString = function(){return "(" + this.from + "..." + this.to +
 
 // Java式类的继承
 // 6-2 extend()和8-3改进版
-function extend(o, p) {
+function extend1(o, p) {
     for(prop in p){         // 复制p所有枚举属性，并不处理getter，setter以及复制属性
         o[prop] = p[prop];
     }
     return o
 }
-var extend = (function () {
-        for(var p in {toString: null}){
+// 用来将第二个以及后续参数复制至第一个参数
+var extend2 = (function () {
+        for(var p in {toString: null}){     // 检查IE bug
             return function extend(o) {
                 for(var i = 1; i < arguments.length; i++){
                     var source = arguments[i];
@@ -101,11 +133,11 @@ var extend = (function () {
                 return o
             }
         }
-        return function patched_extend(o) {
+        return function patched_extend(o) {     // 不可枚举属性
             for(var i =1; i < arguments.length; i++){
                 var source = arguments[i];
-                for (var prop in source) o[prop] = source[prop];
-                for(var j = 0; j < protoprops.length; j++){
+                for (var prop in source) o[prop] = source[prop];    // 复制所有可枚举属性
+                for(var j = 0; j < protoprops.length; j++){     // 检查特殊属性
                     prop = protoprops[j];
                     if(source.hasOwnProperty(prop)) o[prop] = source[prop];
                 }
@@ -115,7 +147,50 @@ var extend = (function () {
         var protoprops = ['toString', 'valueOf', 'constructor', 'hasOwnProperty',
                             'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString'];
     } ());
-console.log(extend(null));
+
+// 9.3java式类继承：属性和方法都复制到构造函数
+function defineClass(constructor,methods,statics) {
+    if (methods) extend2(constructor.prototype, methods);      // 实例的方法复制到原型中
+    if (statics) extend2(constructor,statics);      // 类属性复制到构造函数中
+    return constructor;
+}
+// Range类的另一种是实现
+var SimpleRange =
+    defineClass(function (f,t) {this.f = f; this.t = t;},
+                {
+                    includes: function (x) { return this.f <= x && x <= this.t;},
+                    toString: function () {return this.f + '...' + this.t;}
+                },
+                { upto: function (t) {return new SimpleRange(0,t);} } );
+// 类的扩充
+
+// 9.8.1让属性不可枚举
+// 9-17定义不可枚举属性
+/*
+(function () {
+    Object.defineProperty(Object.prototype, "objectId",{
+                           get: idGetter,       // 取值器
+                           enumerable: false,   // 不可枚举
+                           configurable: false  // 不可删除
+                        });
+    function idGetter() {
+        if(!(idprop in this)){
+            if (!Object.isExtensible(this)) throw Error("can't define id for nonextensible objects");
+            Object.defineProperty(this, idprop, {
+                                    value: nextid++,
+                                    writable: false,
+                                    enumerable: false,          // 枚举
+                                    configurable: false         // 修改
+                                });
+        }
+        return this[idprop];
+    }
+    // idGetter();
+    var idprop = "|**objectId**";  // 假设没用到这个属性
+    var nextid = 1;  // 设置初始值
+}());  */
+// 9-18 定义不可变的类
+
 </script>
 <button onclick="studyScript()">studyScript</button>
 </body>
