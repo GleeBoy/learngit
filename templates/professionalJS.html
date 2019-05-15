@@ -7,7 +7,27 @@
 </head>
 <body>
 <script language=javascript>
-    //
+    // 工厂模式
+    function createPerson(name) {
+        var o = new Object();
+        o.name = name;
+        o.sayName = function () {
+            alert(o.name)
+        };
+        return o
+    }
+
+    function Person() {
+    }
+    Person.prototype.name = 'Nick';
+    var person1 = new Person();
+    person1.name = 'Greg';
+    console.log(person1.name);
+    delete person1.name;
+    console.log(Object.prototype.toString( { x: 1 } ) );
+    function hasPrototypeProperty(o, name) {
+        return !o.hasOwnProperty(name) && (name in o);
+    }
 </script>
 
 
