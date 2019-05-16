@@ -122,6 +122,16 @@ function extend1(o, p) {
     }
     return o
 }
+// 开发人员定义的都是可枚举的属性,IE8以前早期版本中的bug
+var o = {
+    toString: function () {
+        return "My Object";
+    }
+};
+for (var prop in o){
+    if (prop == "toString") alert('Found toString'); // 在早期IE中不会执行，
+    // 在IE中认为prototype中是[[Enumerable: false]],所以就跳过
+}
 // 用来将第二个以及后续参数复制至第一个参数
 var extend2 = (function () {
         for(var p in {toString: null}){     // 检查IE bug
@@ -162,6 +172,8 @@ var SimpleRange =
                     toString: function () {return this.f + '...' + this.t;}
                 },
                 { upto: function (t) {return new SimpleRange(0,t);} } );
+
+
 // 类的扩充
 
 // 9.8.1让属性不可枚举

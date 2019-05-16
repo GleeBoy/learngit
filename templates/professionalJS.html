@@ -22,11 +22,55 @@
     Person.prototype.name = 'Nick';
     var person1 = new Person();
     person1.name = 'Greg';
-    console.log(person1.name);
+    // console.log(person1.name);
     delete person1.name;
-    console.log(Object.prototype.toString( { x: 1 } ) );
     function hasPrototypeProperty(o, name) {
         return !o.hasOwnProperty(name) && (name in o);
+    }
+    Person.prototype = {
+        name: 'Nicholas',
+        sayName: function () {
+            alert(o.name)
+        }
+    };
+    Object.defineProperty(Person.prototype, "constructor", {
+        enumerable: false,
+        value: Person
+    });
+    String.prototype.startsWith = function (text) {
+        return this.indexOf(text) == 0;
+    };
+    // console.log(Object.keys([1,2,3]));
+    // 动态原型模式
+    function Person(name) {
+        this.name = name;
+        if(typeof  this.sayName != "function"){
+            Person.prototype.sayName = function () {
+                alert(this.name);
+            }
+        }
+    }
+    function SpecialArray(a,b,c) {
+        var values = new Array();
+        values.push.call(values, a,b,c); // 添加值
+        values.toPipedString = function () {
+            return this.join("|");
+        }
+        return values;
+    }
+    var colors = new SpecialArray('red','blue', 'green');
+    function P(name) {
+        var o = new Object();
+        o._name = name;
+        o.sayName = function () {
+            alert(name)  // 变量name，而不是属性
+        };
+        return o
+    }
+    var p = P('N');
+    var po = P('test1');
+    function SuperType() {
+        this.property = true;
     }
 </script>
 
